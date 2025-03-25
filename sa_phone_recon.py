@@ -3,16 +3,42 @@ import requests
 import re
 import json
 from concurrent.futures import ThreadPoolExecutor
-import time
-import os
 import sys
 from bs4 import BeautifulSoup
 
 # Configuration
 SA_COUNTRY_CODE = "+27"
 HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Linux) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36'
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
+
+def display_banner():
+    print("""\033[1;31m
+    ____                 __        ______          __      _______          __ 
+   / __ )____  ____     / /_____  / ____/___  ____/ /__   / ____(_)__  ____/ /_
+  / __  / __ \/ __ \   / __/ __ \/ /   / __ \/ __  / _ \ / /_  / / _ \/ __  __/
+ / /_/ / /_/ / /_/ /  / /_/ /_/ / /___/ /_/ / /_/ /  __/ /_/ / /  __/ /_/ /   
+/_____/\____/\____/   \__/\____/\____/\____/\__,_/\___/\____/_/\___/\__,_/    
+                                                                               
+    \033[0m""")
+    print("""\033[1;31m
+                              ____  
+                             |    | 
+                             |____| 
+                             /####/ 
+                            /####/  
+          /\                /####/   
+         /  \              /####/    
+        /    \            |====|     
+       /      \           |    |     
+      /        \          |    |     
+     /          \         |    |     
+    /            \        |    |     
+   /              \       |    |     
+  /                \      |    |     
+ /                  \     |    |     
+/                    \    |____|     
+\033[0m""")
 
 def is_south_african_number(phone):
     """Validate South African phone number format"""
@@ -115,50 +141,35 @@ def save_results(phone, data):
     return filename
 
 def main():
-    print("""\033[1;32m
-   _____ _                 _____       _           
-  / ____| |               / ____|     | |          
- | (___ | |__   ___  ___ | |  __ _ __ | |__  _ __  
-  \___ \| '_ \ / _ \/ _ \| | |_ | '_ \| '_ \| '_ \ 
-  ____) | | | |  __/ (_) | |__| | |_) | | | | |_) |
- |_____/|_| |_|\___|\___/ \_____| .__/|_| |_| .__/ 
-                                | |         | |    
-                                |_|         |_|    
-    \033[0m""")
+    display_banner()
     
-    phone = input("\nEnter South African phone number (e.g., 0821234567): ").strip()
+    phone = input("\n\033[1;31m[+] Enter South African phone number (e.g., 0821234567): \033[0m").strip()
     
     if not is_south_african_number(phone):
-        print("\033[1;31m[-] Invalid South African phone number format\033[0m")
+        print("\n\033[1;31m[-] Invalid South African phone number format\033[0m")
         print("Valid formats: 0821234567 or +27821234567")
         return
     
     clean_phone = clean_number(phone)
-    print(f"\n\033[1;34m[+] Investigating SA number: {clean_phone}\033[0m")
+    print(f"\n\033[1;31m[+] Investigating SA number: {clean_phone}\033[0m")
     
-    print("\n\033[1;36m[+] Searching platforms...\033[0m")
+    print("\n\033[1;31m[+] Searching platforms...\033[0m")
     results = search_all_platforms(clean_phone)
     
     if not results:
-        print("\033[1;31m[-] No information found for this number\033[0m")
+        print("\n\033[1;31m[-] No information found for this number\033[0m")
         return
     
-    print("\n\033[1;32m[+] Found associated accounts:\033[0m")
+    print("\n\033[1;31m[+] Found associated accounts:\033[0m")
     for platform, data in results.items():
         print(f"\n\033[1;33m{platform.upper()}:\033[0m")
         for key, value in data.items():
-            print(f"  {key}: {value}")
+            print(f"  \033[1;32m{key}:\033[0m {value}")
     
     filename = save_results(clean_phone, results)
-    print(f"\n\033[1;32m[+] Results saved to {filename}\033[0m")
+    print(f"\n\033[1;31m[+] Results saved to {filename}\033[0m")
 
 if __name__ == "__main__":
-    # Check if running on Kali or Termux
-    if not (os.path.exists('/etc/os-release') or 'kali' in open('/etc/os-release').read().lower()):
-        if not os.path.exists('/data/data/com.termux/files/home'):
-            print("\033[1;31m[-] This script is designed to run on Kali Linux or Termux only\033[0m")
-            sys.exit(1)
-    
     try:
         main()
     except KeyboardInterrupt:
